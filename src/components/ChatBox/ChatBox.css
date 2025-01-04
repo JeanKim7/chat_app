@@ -65,7 +65,7 @@
 }
 
 .chat-msg{
-    height:calc(100% - 90px);
+    height:calc(100% - 70px);
     padding-bottom: 50px;
     overflow-y: scroll;
     display:flex;
