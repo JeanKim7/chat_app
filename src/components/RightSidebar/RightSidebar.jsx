@@ -5,10 +5,11 @@ import assets from '../../assets/assets'
 const RightSidebar = () => {
   return (
     <div className='rs'>
-        <div className="rs-profile"></div>
-        <img src={assets.profile_img} alt="" />
-        <h3>Richard Sanford <img src={assets.green_dot} alt="" className="dot" /></h3>
-        <p>Hey there, I am Richard Sanford using chat app</p>
+        <div className="rs-profile">
+          <img src={assets.profile_img} alt="" />
+          <h3>Richard Sanford <img src={assets.green_dot} alt="" className="dot" /></h3>
+          <p>Hey there, I am Richard Sanford using chat app</p>
+        </div>
         <hr />
         <div className="rs-media">
           <p>Media</p>
