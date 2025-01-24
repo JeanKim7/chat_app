@@ -1,6 +1,6 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
-import { createUserWithEmailAndPassword, getAuth } from "firebase/auth";
+import { createUserWithEmailAndPassword, getAuth, signInWithEmailAndPassword } from "firebase/auth";
 import { doc, getFirestore, setDoc } from "firebase/firestore";
 import { toast } from "react-toastify";
 
@@ -40,4 +40,14 @@ const signup = async (username, email, password) => {
     }
     }
 
-    export {signup}
+const login = async (email,password) => {
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+
+    } catch (error) {
+      console.error(error)
+      toast.error(error.code)
+    }
+}
+    
+    export {signup, login}
