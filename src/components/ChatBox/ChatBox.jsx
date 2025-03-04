@@ -2,8 +2,9 @@ import React, { useContext, useEffect, useState } from 'react'
 import "./ChatBox.css"
 import assets from '../../assets/assets'
 import { AppContext } from '../../context/AppContext'
-import { doc, onSnapshot } from 'firebase/firestore'
+import { arrayUnion, doc, getDoc, onSnapshot, updateDoc } from 'firebase/firestore'
 import { db } from '../../config/firebase'
+import { toast } from 'react-toastify'
 
 const ChatBox = () => {
 
@@ -14,17 +15,38 @@ const ChatBox = () => {
   const sendMessage = async () => {
     try {
       if (input && messagesId) {
-        await updateDoc(doc(db), 'messages', messagesId),{
-          messages: arrayUntion({
+        await updateDoc(doc(db, 'messages', messagesId),{
+          messages: arrayUnion({
             sId:userData.id,
             text: input,
             createdAt: new Date()
           })
-        }
+        })
+
+        const userIDs = [chatUser.rId, userData.id];
+
+        userIDs.forEach(async (id) => {
+          const userChatsRef = doc(db, 'chats', id);
+          const userChatsSnapshot = await getDoc(userChatsRef);
+
+          if (userChatsSnapshot.exists()){
+            const userChatData = userChatsSnapshot.data();
+            const chatIndex = userChatData.chatsData.findInex((c)=>c.messageID === messagesId)
+            userChatData.chatsData[chatIndex].lastMessage = input.slice(0,30);
+            userChatData.chatsdata[chatIndex].updatedAt = Date.now()
+            if (userChatData.chatsData[chatIndex].rId === userData.id) {
+              userChatData.chatsData[chatIndex].messageSeen=false;
+            }
+            await updateDoc(userChatsRef, {
+              chatsData: userChatData.chatsData
+            })
+          }
+        })
       }
     } catch (error) {
-      
+      toast.error(error.message)
     }
+    setInput("")
   }
 
   useEffect(()=>{
@@ -77,7 +99,7 @@ const ChatBox = () => {
         <label htmlFor="image">
           <img src={assets.gallery_icon} alt="" />
         </label>
-        <img src={assets.send_button} alt="" />
+        <img  onClick={sendMessage} src={assets.send_button} alt="" />
       </div>
     </div>
   ):  <div className='chat-welcome'>
