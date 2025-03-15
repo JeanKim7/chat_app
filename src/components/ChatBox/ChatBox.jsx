@@ -24,16 +24,17 @@ const ChatBox = () => {
         })
 
         const userIDs = [chatUser.rId, userData.id];
-
+        console.log(userIDs)
         userIDs.forEach(async (id) => {
           const userChatsRef = doc(db, 'chats', id);
           const userChatsSnapshot = await getDoc(userChatsRef);
 
+
           if (userChatsSnapshot.exists()){
             const userChatData = userChatsSnapshot.data();
-            const chatIndex = userChatData.chatsData.findInex((c)=>c.messageID === messagesId)
+            const chatIndex = userChatData.chatsData.findIndex((c)=>c.messageId === messagesId)
             userChatData.chatsData[chatIndex].lastMessage = input.slice(0,30);
-            userChatData.chatsdata[chatIndex].updatedAt = Date.now()
+            userChatData.chatsData[chatIndex].updatedAt = Date.now()
             if (userChatData.chatsData[chatIndex].rId === userData.id) {
               userChatData.chatsData[chatIndex].messageSeen=false;
             }
@@ -46,20 +47,37 @@ const ChatBox = () => {
     } catch (error) {
       toast.error(error.message)
     }
-    setInput("")
+    setInput("");
+  }
+
+  const convertTimestamp = (timestamp) =>{
+    let date=timestamp.toDate();
+    const hour = date.getHours();
+    let minute = date.getMinutes();
+    if (minute<10){
+      minute = "0"+ minute
+    }
+    if (hour>12) {
+      return hour-12 + ":" + minute + " PM"
+    }
+    else {
+      return hour + ":" + minute + " AM"
+    }
   }
 
   useEffect(()=>{
     if (messagesId) {
       const unSub = onSnapshot(doc(db, 'messages', messagesId), (res)=>{
         setMessages(res.data().messages.reverse())
-        console.log(res.data().messages.reverse())
+        
       })
       return ()=>{
         unSub();
       }
     }
-  }, messagesId)
+  }, [messagesId])
+
+  console.log(messages)
 
   return chatUser ? (
     <div className='chat-box'>
@@ -70,28 +88,17 @@ const ChatBox = () => {
       </div> 
 
       <div className="chat-msg">
-        <div className="s-msg">
-          <p className="msg">Lorem is placeholder text commonly used in..</p>
-          <div>
-            <img src={assets.profile_img} alt="" />
-            <p>2:30 PM</p>
-          </div>
+
+        {messages.map((msg,index)=>(
+          <div key={index} className={msg.sId === userData.id ? "s-msg" : "r-msg"}>
+            <p className="msg">{msg.text}</p>
+            <div>
+              <img src={msg.sId === userData.id ? userData.avatar : chatUser.userData.avatar} alt="" />
+              <p>{convertTimestamp(msg.createdAt)}</p>
+            </div>
         </div>
-        <div className="s-msg">
-          <img className="msg-img" src={assets.pic1} alt="" />
-          <div>
-            <img src={assets.profile_img} alt="" />
-            <p>2:30 PM</p>
-          </div>
+        ))} 
         </div>
-        <div className="r-msg">
-          <p className="msg">Lorem is placeholder text commonly used in..</p>
-          <div>
-            <img src={assets.profile_img} alt="" />
-            <p>2:30 PM</p>
-          </div>
-        </div>
-      </div>
 
       <div className="chat-input">
         <input onChange={(e)=>setInput(e.target.value)} value={input} type="text" placeholder='Send a message' />
